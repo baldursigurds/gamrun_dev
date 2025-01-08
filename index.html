@@ -1,0 +1,879 @@
+<html>
+<head>
+    <title>Puck.js MARG/IMU heading project</title>
+</head>
+<body>
+    <script src="https://www.puck-js.com/puck.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="./madgwick.js"></script>
+    <script src="./calibrtr.js"></script>
+    <button id="btnConnect">Connect</button>
+    <button id="btnDisconnect">Disconnect</button>
+    <button id="btnCalibrtr">Calibrate magnetometer</button>
+    <button id="btnCalibGyro">Calibrate gyroscope</button><br>
+    <span>Battery level: <span id="battLevelSpan"></span></span><br>
+    <span>other data: <span id="otherData"></span></span><br>
+    <span>Algorithm: <span id="algorithm"></span></span><br>
+    <span>Macalibrating: <span id="caliCounter"></span></span>
+    <table border="1">
+      <tr>
+        <td> </td>
+        <td> Gyroscope </td>
+        <td> Accelerometer </td>
+        <td> Rotaded Acc </td>
+        <td> Magnetometer </td>
+        <td> Calibrated Mag </td>
+        <td> Cal. Rotated Mag </td>
+        <td> Radius Ratio </td>
+        <td> Gyro offset </td>
+        <td> Mag. transl. </td>
+        <td> col 1 </td>
+        <td> col 2 </td>
+        <td> col 3 </td>
+        <td> Eigenvals </td>
+        <td> Flux vector </td>
+        <td> Accel dist </td>
+        <td> Stillness </td>
+        <td> Velocity </td>
+        <td> Position </td>
+        <td> Steps </td>
+        <td> Step </td>
+      </tr>
+      <tr>
+        <td> X </td>
+        <td> <span id="tdGyroX">      </span> </td>
+        <td> <span id="tdAccelX">     </span> </td>
+        <td> <span id="tdAccRotX">    </span> </td>
+        <td> <span id="tdMagX">       </span> </td>
+        <td> <span id="tdCalibMagX">  </span> </td>
+        <td> <span id="tdCaRoMagX">   </span> </td>
+        <td> <span id="tdRR">         </span> </td>
+        <td> <span id="tdGyroOffX">   </span> </td>
+        <td> <span id="tdTranslX">    </span> </td>
+        <td> <span id="tdMat11">      </span> </td>
+        <td> <span id="tdMat12">      </span> </td>
+        <td> <span id="tdMat13">      </span> </td>
+        <td> <span id="tdEigen1">     </span> </td>
+        <td> <span id="tdFluxX">      </span> </td>
+        <td> <span id="tdAccDist">    </span> </td>
+        <td> <span id="tdStillness">  </span> </td>
+        <td> <span id="tdVelocityX">  </span> </td>
+        <td> <span id="tdPositionX">  </span> </td>
+        <td> <span id="tdSteps">      </span> </td>
+        <td> <span id="tdStepX">      </span> </td>
+      </tr>
+      <tr>
+        <td> Y </td>
+        <td> <span id="tdGyroY">      </span> </td>
+        <td> <span id="tdAccelY">     </span> </td>
+        <td> <span id="tdAccRotY">    </span> </td>
+        <td> <span id="tdMagY">       </span> </td>
+        <td> <span id="tdCalibMagY">  </span> </td>
+        <td> <span id="tdCaRoMagY">   </span> </td>
+        <td>                                  </td>
+        <td> <span id="tdGyroOffY">   </span> </td>
+        <td> <span id="tdTranslY">    </span> </td>
+        <td> <span id="tdMat21">      </span> </td>
+        <td> <span id="tdMat22">      </span> </td>
+        <td> <span id="tdMat23">      </span> </td>
+        <td> <span id="tdEigen2">     </span> </td>
+        <td> <span id="tdFluxY">      </span> </td>
+        <td>                                  </td>
+        <td>                                  </td>
+        <td> <span id="tdVelocityY">  </span> </td>
+        <td> <span id="tdPositionY">  </span> </td>
+        <td>                                  </td>
+        <td> <span id="tdStepY">      </span> </td>
+      </tr>
+      <tr>
+        <td> Z </td>
+        <td> <span id="tdGyroZ">      </span> </td>
+        <td> <span id="tdAccelZ">     </span> </td>
+        <td> <span id="tdAccRotZ">    </span> </td>
+        <td> <span id="tdMagZ">       </span> </td>
+        <td> <span id="tdCalibMagZ">  </span> </td>
+        <td> <span id="tdCaRoMagZ">   </span> </td>
+        <td>                                  </td>
+        <td> <span id="tdGyroOffZ">   </span> </td>
+        <td> <span id="tdTranslZ">    </span> </td>
+        <td> <span id="tdMat31">      </span></td>
+        <td> <span id="tdMat32">      </span> </td>
+        <td> <span id="tdMat33">      </span> </td>
+        <td> <span id="tdEigen3">     </span> </td>
+        <td> <span id="tdFluxZ">      </span></td>
+        <td>                                  </td>
+        <td>                                  </td>
+        <td> <span id="tdVelocityZ">  </span> </td>
+        <td> <span id="tdPositionZ">  </span> </td>
+        <td>                                  </td>
+        <td> <span id="tdStepZ">      </span> </td>
+      </tr>
+      <tr>
+        <td> abs </td>
+        <td> <span id="tdGyroABS">      </span> </td>
+        <td> <span id="tdAccelABS">     </span> </td>
+        <td> <span id="tdAccRotABS">    </span> </td>
+        <td> <span id="tdMagABS">       </span> </td>
+        <td> <span id="tdCalibMagABS">  </span> </td>
+        <td> <span id="tdCaRoMagABS">   </span> </td>
+        <td>                                    </td>
+        <td> <span id="tdGyroOffABS">   </span> </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+        <td>                                    </td>
+      </tr>
+    </table>
+    <canvas
+        id="path"
+        width="500"
+        height="500"
+        style="border:1px solid #000000;">
+    asdf
+    </canvas>
+    <canvas
+        id="step"
+        width="500"
+        height="500"
+        style="border:1px solid #000000;">
+    asdf
+    </canvas>
+    <canvas
+        id="puck"
+        width="500"
+        height="500"
+        style="border:1px solid #000000;">
+    </canvas>
+    <script>
+
+const canvas_path = document.querySelector("#path");
+const ctx_path = canvas_path.getContext("2d");
+
+const canvas_step = document.querySelector("#step");
+const ctx_step = canvas_step.getContext("2d");
+
+ctx_step.fillStyle = "red";
+var maxX = .1;
+var maxY = .1;
+var minX = 0;
+var minY = 0;
+
+function drawPath(path)
+{
+    let xCoord, yCoord;
+    let [maxes,mines] = max_min_vals(path);
+    //ctx_path.clearRect(0, 0, ctx_path.canvas.width, ctx_path.canvas.height);
+    canvas_path.width = canvas_path.width;
+    ctx_path.strokeStyle = "black";
+    for(i=0; i<path.length; i++)
+    {
+        xCoord = 50 + 400 * (path[i][0] - mines[0]) / (maxes[0] - mines[0]);
+        yCoord = 50 + 400 * (path[i][1] - mines[1]) / (maxes[1] - mines[1]);
+        if(i>0)
+        {
+            ctx_path.lineTo(xCoord, yCoord);
+            ctx_path.stroke();
+            ctx_path.fillRect(xCoord-5, yCoord-5, 10, 10);
+
+        }
+        ctx_path.moveTo(xCoord, yCoord);
+//      if(path[i][3]) {
+//          ctx_path.fillStyle = "red";
+//          ctx_path.fillRect(xCoord-5, yCoord-5, 10, 10);
+//      } else {
+//          ctx_path.fillStyle = "black";
+//      }
+    }
+    ctx_path.fillStyle = "green";
+    ctx_path.fillRect(xCoord-10, yCoord-10, 20, 20);
+}
+
+function drawStep(path)
+{
+    ctx_step.fillStyle = "red";
+    let xCoord, yCoord;
+    let [maxes,mines] = max_min_vals(path);
+    //ctx_step.clearRect(0, 0, ctx_step.canvas.width, ctx_step.canvas.height);
+    canvas_step.width = canvas_step.width;
+    ctx_step.font = "50px Arial";
+    ctx_step.fillText(0,0,"asdf");
+    ctx_step.strokeStyle = "black";
+    for(i=0; i<path.length; i++)
+    {
+        xCoord = 50 + 400 * (path[i][0] - mines[0]) / (maxes[0] - mines[0]);
+        yCoord = 50 + 400 * (path[i][1] - mines[1]) / (maxes[1] - mines[1]);
+        if(i>0)
+        {
+            ctx_step.lineTo(xCoord, yCoord);
+            if(i < path.length-20) {
+                ctx_step.strokeStyle = "black";
+                ctx_step.stroke();
+                ctx_step.fillStyle = "black";
+                ctx_step.fillRect(xCoord-5, yCoord-5, 10, 10);
+
+            }
+            if(i >= path.length-20) {
+                ctx_step.strokeStyle = "red";
+                ctx_step.stroke();
+                ctx_step.fillStyle = "red";
+                ctx_step.fillRect(xCoord-5, yCoord-5, 10, 10);
+            }
+        }
+        ctx_step.moveTo(xCoord, yCoord);
+//      if(path[i][3]) {
+//          ctx_step.fillStyle = "red";
+//          ctx_step.fillRect(xCoord-5, yCoord-5, 10, 10);
+//      } else {
+//          ctx_step.fillStyle = "black";
+//      }
+    }
+    ctx_step.fillStyle = "green";
+    ctx_step.fillRect(xCoord-10, yCoord-10, 20, 20);
+}
+
+// Constants
+// max 16g at 32768
+const accel_factor = 9.8 * 16 / 32768;
+// max 2000dps at 32768, and a calibration factor
+const gyro_factor = (1/0.87) * 1000 / 32768 * 2*Math.PI / 360;
+//  const gyro_factor = 1000 / 32768 * 2*Math.PI / 360;
+// don't change hz without revising the two above factors
+const hz = 104;              // Data rate of accel/gyro.
+const magHz = 80;           // Data rate of magnetometer.
+const deltat = 1/hz;        // Change in time
+const battLevelSpan = document.getElementById('battLevelSpan');
+const otherData = document.getElementById('otherData');
+const algorithm = document.getElementById('algorithm');
+const caliCounter = document.getElementById('caliCounter');
+
+// 0001 12.5
+// 0010 26
+// 0011 52
+// 0100 104
+// 0101 208
+
+// Code to upload to Puck.js
+var PUCK_CODE = `
+freq = ${hz}
+// Blink green LED to show we've connected
+digitalPulse(LED2, 1, 500);
+
+// Turn on accel/gyro, then specify parameters
+// see acc_factor and gyro_factor
+Puck.accelOn();
+Puck.accelWr(0x10, 0b01000100);
+Puck.accelWr(0x11, 0b01001000);
+// Turn on magnetometer
+Puck.magOn(${magHz});
+
+// Report the battery every 10 seconds
+const batteryIntervalId = setInterval(function(){
+    reportBattery()
+}, 10000);
+    
+// Turn off the accelerometer and battery reporting when we disconnect. Blink red LED.
+NRF.on('disconnect', function() {
+    stop_running();
+    digitalPulse(LED1, 1, 500);
+    clearInterval(batteryIntervalId);
+});
+
+// Have Puck report battery every 30 seconds
+function reportBattery(){
+    var d = [
+        "B",
+        Math.round(Puck.getBatteryPercentage())
+      ];
+    Bluetooth.println(d.join(","));
+}
+// When we get accelerometer/gyro data, report accel/gyro/mag data
+// they are just reported directly from the sensor,
+// scaling and calibration is done later
+Puck.on('accel',function(a) {
+    mag = Puck.mag();
+    var d = [
+        "A",
+        Math.round(a.acc.x),
+        Math.round(a.acc.y),
+        Math.round(a.acc.z),
+        Math.round(a.gyro.x),
+        Math.round(a.gyro.y),
+        Math.round(a.gyro.z),
+        Math.round(mag.x),
+        Math.round(mag.y),
+        Math.round(mag.z)
+    ];
+    Bluetooth.println(d.join(","));
+        });
+        `;
+
+// Vector3 variables to hold data from accel/gyro/mag/battery
+var accel = new THREE.Vector3( 0, 0, 0);
+const accel_up = new THREE.Vector3( 0, 0, 9.8);
+var accelDist = 0;
+var accel_rot = new THREE.Vector3( 0, 0, 0);
+var gyro = new THREE.Vector3(0, 0, 0);
+var gyro_off = new THREE.Vector3(0, 0, 0);
+var gyro_cali = new THREE.Vector3(0, 0, 0);
+var mag = new THREE.Vector3(0, 0, 0);
+var mag_cali = new THREE.Vector3(0, 0, 0);
+var mag_cali_rot = new THREE.Vector3(0, 0, 0);
+var mag_orto = new THREE.Vector3(0, 0, 0);
+var linearAccel = new THREE.Vector3(0, 0, 0);
+var velocity = new THREE.Vector3(0, 0, 0);
+var position = new THREE.Vector3(0, 0, 0);
+var battery = 100;
+var step = [];
+var path = [ [0,0,0] ];
+
+// Quaternion to hold rotation data
+var rotation = new THREE.Quaternion(0, 0, 0, 1);
+
+// For holding mag calibration data
+var magneto_data = [];
+var calibrating_mag = false;
+var calibrating_counter = 0;
+var cd = {
+    matrix: [ [ 1, 0, 0],
+              [ 0, 1, 0],
+              [ 0, 0, 1] ],
+    transl: [0, 0, 0],
+    radius: 100,
+    eigenv: [1,1,1],
+};
+
+var mag_matrix = new THREE.Matrix3();
+var mag_transl = new THREE.Vector3();
+var mag_radius;
+var mag_radius_sq;
+function calibrate(data) {
+    mag_matrix.set(data.matrix[0][0],
+                   data.matrix[0][1],
+                   data.matrix[0][2],
+                   data.matrix[0][0],
+                   data.matrix[1][1],
+                   data.matrix[1][2],
+                   data.matrix[2][0],
+                   data.matrix[2][1],
+                   data.matrix[2][2]);
+    mag_transl.x = data.transl[0];
+    mag_transl.y = data.transl[1];
+    mag_transl.z = data.transl[2];
+    mag_radius   = data.radius;
+    mag_radius_sq = mag_radius * mag_radius;
+    document.getElementById('tdTranslX').innerText
+        = mag_transl.x.toFixed(0);
+    document.getElementById('tdTranslY').innerText
+        = mag_transl.y.toFixed(0);
+    document.getElementById('tdTranslZ').innerText
+        = mag_transl.z.toFixed(0);
+    document.getElementById('tdMat11').innerText
+        = data.matrix[0][0].toFixed(6);
+    document.getElementById('tdMat12').innerText
+        = data.matrix[0][1].toFixed(6);
+    document.getElementById('tdMat13').innerText
+        = data.matrix[0][2].toFixed(6);
+    document.getElementById('tdMat21').innerText
+        = data.matrix[1][0].toFixed(6);
+    document.getElementById('tdMat22').innerText
+        = data.matrix[1][1].toFixed(6);
+    document.getElementById('tdMat23').innerText
+        = data.matrix[1][2].toFixed(6);
+    document.getElementById('tdMat31').innerText
+        = data.matrix[2][0].toFixed(6);
+    document.getElementById('tdMat32').innerText
+        = data.matrix[2][1].toFixed(6);
+    document.getElementById('tdMat33').innerText
+        = data.matrix[2][2].toFixed(6);
+    document.getElementById('tdEigen1').innerText
+        = data.eigenv[0].toFixed(6);
+    document.getElementById('tdEigen2').innerText
+        = data.eigenv[1].toFixed(6);
+    document.getElementById('tdEigen3').innerText
+        = data.eigenv[2].toFixed(6);
+}
+calibrate(cd);
+
+// For holding gyro calibration data
+var calibrating_gyro = false;
+var gyro_counter = 0;
+
+
+// data for the Madgwick algorithm
+frame = {
+    iteration: 0,
+    deltat: deltat,
+    SEq_1: 1,
+    SEq_2: 0,
+    SEq_3: 0,
+    SEq_4: 0,
+    acc_x: 0,
+    acc_y: 0,
+    acc_z: 0,
+    vel_x: 0,
+    vel_y: 0,
+    vel_z: 0,
+    pos_x: 0,
+    pos_y: 0,
+    pos_z: 0,
+    b_x: 1,
+    b_z: 0,
+    w_bx: 0,
+    w_by: 0,
+    w_bz: 0,
+    beta: 1*Math.sqrt(3.0 / 4.0),// * 3.14159265358979 * (5.0 / 180.0),
+    zeta: 1*Math.sqrt(3.0 / 4.0),// * 3.14159265358979 * (0.2 / 180.0),
+    //beta: 0,
+    //zeta: 0,
+    still: 0,
+    stillness: 20
+};
+// When we click the connect button...
+var connection;
+document.getElementById("btnDisconnect").addEventListener("click", function() 
+{
+    // disconnect if connected already
+    if (connection) {
+        connection.close();
+            connection = undefined;
+    }
+});
+
+document.getElementById("btnConnect").addEventListener("click", function() 
+{
+    // disconnect if connected already
+    if (connection) {
+        connection.close();
+        connection = undefined;
+    }
+    // Connect
+    Puck.connect(function(c) {
+        if (!c) {
+            alert("Couldn't connect!");
+            return;
+        }
+        connection = c;
+        // Handle the data we get back, and call 'onLine'
+        // whenever we get a line
+        var buf = "";
+        connection.on("data", function(d) {
+        buf += d;
+        var l = buf.split("\n");
+        buf = l.pop();
+            l.forEach(onLine);
+        });
+        // First, reset the Puck
+        connection.write("reset();\n", function() {
+                // Wait for it to reset itself
+            setTimeout(function() {
+                // Now upload our code to it
+                connection.write("\x03\x10if(1){"+PUCK_CODE+"}\n",
+                function() { console.log("Ready..."); });
+            }, 1500);
+        });
+    });
+});
+
+// magnetocalibration:
+document.getElementById("btnCalibrtr").addEventListener("click", function() 
+{
+    calibrating_mag = true;
+});
+
+// gyroocalibration:
+document.getElementById("btnCalibGyro").addEventListener("click", function() 
+{
+    calibrating_gyro = true;
+});
+
+// When we get a line of data, check it and if it's
+// from the accelerometer, update it
+function onLine(line) 
+{
+    //console.log("RECEIVED:"+line);
+    var d = line.split(",");
+
+    // Battery data
+    if (d.length==2 && d[0]=="B") 
+    {
+        battery = parseInt(d[1]);  
+        battLevelSpan.innerText = battery + "%";
+        //console.log("BATTERY");
+        //console.log(battery);
+    }
+    else if (d.length==10 && d[0]=="A") 
+    {
+        // Accelerometer
+        accel.x = (parseInt(d[1])) * accel_factor;
+        accel.y = (parseInt(d[2])) * accel_factor;
+        accel.z = (parseInt(d[3])) * accel_factor;
+        document.getElementById('tdAccelX').innerText = accel.x.toFixed(4);
+        document.getElementById('tdAccelY').innerText = accel.y.toFixed(4);
+        document.getElementById('tdAccelZ').innerText = accel.z.toFixed(4);
+        document.getElementById('tdAccelABS').innerText
+            = accel.length().toFixed(4);
+
+        // Gyroscope
+        gyro.x = (parseInt(d[4])) * gyro_factor - gyro_off.x;
+        gyro.y = (parseInt(d[5])) * gyro_factor - gyro_off.y;
+        gyro.z = (parseInt(d[6])) * gyro_factor - gyro_off.z;
+        document.getElementById('tdGyroX').innerText = gyro.x.toFixed(4);
+        document.getElementById('tdGyroY').innerText = gyro.y.toFixed(4);
+        document.getElementById('tdGyroZ').innerText = gyro.z.toFixed(4);
+        document.getElementById('tdGyroABS').innerText
+            = gyro.length().toFixed(4);
+        document.getElementById('tdGyroOffX').innerText = gyro_off.x.toFixed(4);
+        document.getElementById('tdGyroOffY').innerText = gyro_off.y.toFixed(4);
+        document.getElementById('tdGyroOffZ').innerText = gyro_off.z.toFixed(4);
+        document.getElementById('tdGyroOffABS').innerText
+            = gyro_off.length().toFixed(4);
+
+        // Magnetometer
+        mag.x = parseInt(d[7]);
+        mag.y = parseInt(d[8]);
+        mag.z = parseInt(d[9]);
+        document.getElementById('tdMagX').innerText = mag.x;
+        document.getElementById('tdMagY').innerText = mag.y;
+        document.getElementById('tdMagZ').innerText = mag.z;
+        document.getElementById('tdMagABS').innerText
+            = mag.length().toFixed(0);
+
+        // Calibrated magnetometer
+        mag_cali.x = mag.x;
+        mag_cali.y = mag.y;
+        mag_cali.z = mag.z;
+        mag_cali.addScaledVector(mag_transl, -1);
+        mag_cali.applyMatrix3(mag_matrix);
+        document.getElementById('tdCalibMagX').innerText
+            = mag_cali.x.toFixed(0);
+        document.getElementById('tdCalibMagY').innerText
+            = mag_cali.y.toFixed(0);
+        document.getElementById('tdCalibMagZ').innerText
+            = mag_cali.z.toFixed(0);
+        document.getElementById('tdCalibMagABS').innerText
+            = mag_cali.length().toFixed(0);
+
+        // Update the Madgwick filter
+        s = {
+            w_x: gyro.x,
+            w_y: gyro.y,
+            w_z: gyro.z,
+            a_x: accel.x,
+            a_y: accel.y,
+            a_z: accel.z,
+            m_x: mag_cali.x,
+            m_y: mag_cali.y,
+            m_z: mag_cali.z
+        };
+
+        // the magnetic radius ratio
+        rad_rat = mag_cali.length() / mag_radius;
+        document.getElementById('tdRR').innerText = rad_rat.toFixed(4);
+        if(0.5 < rad_rat && rad_rat < 2)
+        {
+            update_MARG(s,frame);
+            algorithm.innerText = "MARG";
+        } else {
+            update_IMU(s,frame);
+            algorithm.innerText = "IMU";
+        }
+        // The flux vector
+        document.getElementById('tdFluxX').innerText = frame.b_x.toFixed(0);
+        document.getElementById('tdFluxZ').innerText = frame.b_z.toFixed(0);
+
+        // Rotation 
+        rotation.x = frame.SEq_2;
+        rotation.y = frame.SEq_3;
+        rotation.z = frame.SEq_4;
+        rotation.w = frame.SEq_1;
+
+        // Rotated acceleration
+        accel_rot.x = accel.x;
+        accel_rot.y = accel.y;
+        accel_rot.z = accel.z;
+        accel_rot.applyQuaternion(rotation);
+        document.getElementById('tdAccRotX').innerText = accel_rot.x.toFixed(0);
+        document.getElementById('tdAccRotY').innerText = accel_rot.y.toFixed(0);
+        document.getElementById('tdAccRotZ').innerText = accel_rot.z.toFixed(0);
+        document.getElementById('tdAccRotABS').innerText
+            = accel_rot.length().toFixed(0);
+
+        // Rotaded calibrated magnetometer
+        mag_cali_rot.x = mag_cali.x;
+        mag_cali_rot.y = mag_cali.y;
+        mag_cali_rot.z = mag_cali.z;
+        mag_cali_rot.applyQuaternion(rotation);
+        document.getElementById('tdCaRoMagX').innerText = mag_cali_rot.x.toFixed(0);
+        document.getElementById('tdCaRoMagY').innerText = mag_cali_rot.y.toFixed(0);
+        document.getElementById('tdCaRoMagZ').innerText = mag_cali_rot.z.toFixed(0);
+        document.getElementById('tdCaRoMagABS').innerText
+            = mag_cali_rot.length().toFixed(0);
+
+        // Magnetometer reding ortogonal to accel
+        mag_orto.x = mag_cali_rot.x;
+        mag_orto.y = mag_cali_rot.y;
+        mag_orto.z = mag_cali_rot.z;
+        mag_orto.addScaledVector(accel_rot,
+            - mag_cali_rot.dot(accel_rot)
+            / accel_rot.lengthSq())
+
+        render();
+
+
+        if(calibrating_mag) {
+            if(calibrating_counter < 500) {
+                caliCounter.innerText = "Collecting data: " + calibrating_counter;
+                if( Math.abs(mag.x) < 3000
+                 && Math.abs(mag.y) < 3000
+                 && Math.abs(mag.z) < 3000 ) {
+                    magneto_data.push([mag.x, mag.y, mag.z]);
+                    calibrating_counter++;
+                }
+            } else {
+                caliCounter.innerText = "Collecting data: Done!";
+                calibrating_mag = false;
+                calibrating_counter = 0;
+                cd = fit_to_ellipsoid(magneto_data);
+                magneto_data = [];
+                calibrate(cd);
+            }
+        }
+        if(calibrating_gyro) {
+            if(gyro_counter == 0) {
+                gyro_cali.multiplyScalar(0);
+            }
+            if(gyro_counter < 100) {
+                gyro_cali.x = gyro_cali.x + parseInt(d[4])*gyro_factor;
+                gyro_cali.y = gyro_cali.y + parseInt(d[5])*gyro_factor;
+                gyro_cali.z = gyro_cali.z + parseInt(d[6])*gyro_factor;
+                gyro_counter++;
+            } else {
+                gyro_off.multiplyScalar(0);
+                gyro_off.addScaledVector(gyro_cali,1/100);
+                gyro_counter = 0;
+                calibrating_gyro = false;
+            }
+        }
+
+        // Stillness - 5m/s^2 ~ half g
+        accelDist = accel_rot.distanceToSquared(accel_up);
+        document.getElementById('tdAccDist').innerText = accelDist.toFixed(2);
+        if(accelDist < 5) {
+            frame.stillness++;
+        } else {
+            frame.stillness = 0;
+        }
+
+        document.getElementById('tdStillness').innerText = frame.stillness;
+        document.getElementById('tdVelocityX').innerText = velocity.x.toFixed(3);
+        document.getElementById('tdVelocityY').innerText = velocity.y.toFixed(3);
+        document.getElementById('tdVelocityZ').innerText = velocity.z.toFixed(3);
+        document.getElementById('tdPositionX').innerText = position.x.toFixed(3);
+        document.getElementById('tdPositionY').innerText = position.y.toFixed(3);
+        document.getElementById('tdPositionZ').innerText = position.z.toFixed(3);
+        if(frame.stillness <  20) {
+            // we are flying, let us integrate
+            velocity.addScaledVector(accel_rot, deltat);
+            velocity.addScaledVector(accel_up, -deltat);
+            position.addScaledVector(velocity, deltat);
+            maxX = Math.max(maxX, position.x);
+            maxY = Math.max(maxY, position.y);
+            minX = Math.min(minX, position.x);
+            minY = Math.min(minY, position.y);
+            step.push([ position.x, position.y, position.z ]);
+            document.getElementById('tdStepX').innerText = step[0];
+            document.getElementById('tdStepY').innerText = step[1];
+            document.getElementById('tdStepZ').innerText = step[2];
+        } else if(frame.stillness == 20) {
+            // we are starting a stillness period
+            velocity.fromArray([0,0,0])
+            frame.vel_x = 0;
+            frame.vel_y = 0;
+            frame.vel_z = 0;
+            let cp = correct_path(step);
+            drawStep(cp);
+            step = [];
+            path.push([
+                cp[cp.length-1][0] - cp[0][0],
+                cp[cp.length-1][1] - cp[0][1],
+                cp[cp.length-1][2] - cp[0][2]
+            ]);
+            drawPath(path);
+        } 
+    }
+}
+
+function correct_path(path) {
+    let l = path.length;
+    let return_path = [];
+    let drift = [];
+    for(let i=0; i<3; i++) {
+        drift.push((path[l-1][i] - path[l-20][i])/19);
+    }
+    for(let j=0; j<l; j++) {
+        return_path.push([
+            path[j][0] - drift[0]*j,
+            path[j][1] - drift[1]*j,
+            path[j][2] - drift[2]*j,
+            1
+        ]);
+    }
+    return return_path;
+}
+
+function max_min_vals(path) {
+    let l = path.length;
+    let ma = [path[0][0], path[0][1], path[0][2]];
+    let mi = [path[0][0], path[0][1], path[0][2]];
+    for(let i=0; i<3; i++) {
+        for(let j=1; j<l; j++) {
+            ma[i] = Math.max(ma[i], path[j][i]);
+            mi[i] = Math.min(mi[i], path[j][i]);
+        }
+        console.log(ma);
+        console.log(mi);
+    }
+    return [ma,mi];
+}
+
+
+// WebGL boilerplate
+var scene, camera, renderer, cylinder, xdir, ydir, zdir;
+var WIDTH  = 500;
+var HEIGHT = 500;
+
+// Graphics initialization
+function init() 
+{
+    // Three.js has a default up y axis.
+    // Set this to z instead to align with the Puck.
+    THREE.Object3D.DefaultUp.set(0.0, 0.0, 1.0);
+    scene = new THREE.Scene();
+
+    // Set up camera
+    camera = new THREE.PerspectiveCamera(100, WIDTH / HEIGHT, 0.1, 200);
+    camera.position.set(10, 10, 5);
+    camera.lookAt(scene.position);
+
+    // Illumination
+    var llum = new THREE.DirectionalLight();
+    llum.intensity=30;
+    llum.position.x=camera.position.x;
+    llum.position.y=camera.position.y;
+    llum.position.z=camera.position.z;
+    llum.lookAt(scene.position);
+    scene.add(llum);
+
+    // Create a puck model with xyz axes using cylinders
+    const geometry = new THREE.CylinderGeometry(5, 5, 1, 32);
+    const material = new THREE.MeshStandardMaterial({ color: 0x000000 });
+    geometry.rotateX(degrees_to_radians(90));
+    cylinder = new THREE.Mesh(geometry, material);
+    
+    // x axis (blue)
+    xdir = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 5, 8),
+                          new THREE.MeshStandardMaterial({ color: 0x0000ff }));
+    xdir.translateX(5);
+    xdir.rotateZ(degrees_to_radians(90));
+
+    // y axis (red)
+    ydir = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 5, 8),
+                          new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+    ydir.translateY(5);
+    
+    // z axis (green)
+    zdir = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 5, 8),
+                          new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
+    zdir.translateZ(2.5);
+    zdir.rotateX(degrees_to_radians(90));
+    
+    // acceleration
+    accdir = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 10),
+                        new THREE.MeshStandardMaterial({ color: 0x00aaaa }));
+    acc_rotdir = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 10),
+                 new THREE.MeshStandardMaterial({ color: 0x000000 }));
+    
+    // magnet
+    magdir = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10),
+                       new THREE.MeshStandardMaterial({ color: 0x555500 }));
+    mag_calidir = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10),
+            new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+    mag_cali_rotdir = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10),
+            new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    mag_ortodir = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10),
+             new THREE.MeshStandardMaterial({ color: 0x2233ff }));
+    
+    // Add axes as children of the cylinder
+    cylinder.add(xdir);
+    cylinder.add(ydir);
+    cylinder.add(zdir);
+
+    // Add the cylinder to the scene
+    scene.add(cylinder);
+    //scene.add(accdir);
+    scene.add(acc_rotdir);
+    //scene.add(magdir);
+    scene.add(mag_calidir);
+    scene.add(mag_cali_rotdir);
+    scene.add(mag_ortodir);
+
+    // Renderer
+    const canvas = document.querySelector("#puck");
+    renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+//	renderer.setPixelRatio(window.devicePixelRatio);
+//    renderer.setSize(WIDTH, HEIGHT);
+
+    document.body.appendChild(renderer.domElement);
+}
+
+// Converts degrees to radians
+function degrees_to_radians(degrees)
+{
+    // Store the value of pi.
+    var pi = Math.PI;
+    // Multiply degrees by pi divided by 180 to convert to radians.
+    return degrees * (pi/180);
+}
+
+ 
+// Renders cylinder with rotation from Puck (if connected)
+function render() 
+{
+    // Set rotation based on quaternion
+    cylinder.setRotationFromQuaternion(rotation);
+    // translate accdir
+    accdir.position.x = accel.x;
+    accdir.position.y = accel.y;
+    accdir.position.z = accel.z;
+    acc_rotdir.position.x = accel_rot.x;
+    acc_rotdir.position.y = accel_rot.y;
+    acc_rotdir.position.z = accel_rot.z;
+    magdir.position.x = mag.x / 20;
+    magdir.position.y = mag.y / 20;
+    magdir.position.z = mag.z / 20;
+    mag_calidir.position.x = mag_cali.x / 30;
+    mag_calidir.position.y = mag_cali.y / 30;
+    mag_calidir.position.z = mag_cali.z / 30;
+    mag_cali_rotdir.position.x = mag_cali_rot.x / 10;
+    mag_cali_rotdir.position.y = mag_cali_rot.y / 10;
+    mag_cali_rotdir.position.z = mag_cali_rot.z / 10;
+    mag_ortodir.position.x = mag_orto.x / 20;
+    mag_ortodir.position.y = mag_orto.y / 20;
+    mag_ortodir.position.z = mag_orto.z / 20;
+    renderer.render(scene, camera);
+}
+
+init();
+render();
+
+</script>
+    </body>
+</html>
