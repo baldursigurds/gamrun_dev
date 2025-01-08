@@ -10,7 +10,8 @@
     <button id="btnConnect">Connect</button>
     <button id="btnDisconnect">Disconnect</button>
     <button id="btnCalibrtr">Calibrate magnetometer</button>
-    <button id="btnCalibGyro">Calibrate gyroscope</button><br>
+    <button id="btnCalibGyro">Calibrate gyroscope</button>
+    <button id="btnClearPath">Clear path</button><br>
     <span>Battery level: <span id="battLevelSpan"></span></span><br>
     <span>other data: <span id="otherData"></span></span><br>
     <span>Algorithm: <span id="algorithm"></span></span><br>
@@ -429,8 +430,8 @@ frame = {
     w_bx: 0,
     w_by: 0,
     w_bz: 0,
-    beta: 1*Math.sqrt(3.0 / 4.0) * 3.14159265358979 * (5.0 / 180.0),
-    zeta: 1*Math.sqrt(3.0 / 4.0) * 3.14159265358979 * (0.2 / 180.0),
+    beta: 1*Math.sqrt(3.0 / 4.0),// * 3.14159265358979 * (5.0 / 180.0),
+    zeta: 1*Math.sqrt(3.0 / 4.0),// * 3.14159265358979 * (0.2 / 180.0),
     //beta: 0,
     //zeta: 0,
     still: 0,
@@ -480,6 +481,12 @@ document.getElementById("btnConnect").addEventListener("click", function()
             }, 1500);
         });
     });
+});
+
+document.getElementById("btnClearPath").addEventListener("click", function() 
+{
+    // Clear the path
+    path = [ [0,0,0] ];
 });
 
 // magnetocalibration:
@@ -698,7 +705,6 @@ function onLine(line)
             let cp = correct_path(step);
             drawStep(cp);
             step = [];
-            console.log(path[path.length-1]);
             path.push([
                 path[path.length-1][0] + cp[cp.length-1][0] - cp[0][0],
                 path[path.length-1][1] + cp[cp.length-1][1] - cp[0][1],
